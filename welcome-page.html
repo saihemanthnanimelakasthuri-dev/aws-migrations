@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome Page</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #e0f2fe, #f8fafc, #e2e8f0);
+      color: #0f172a;
+    }
+
+    .container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 900px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 24px;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.12);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+    }
+
+    .content {
+      padding: 60px 50px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #dbeafe;
+      color: #1d4ed8;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: 48px;
+      line-height: 1.1;
+    }
+
+    p {
+      margin: 0 0 28px;
+      font-size: 18px;
+      line-height: 1.7;
+      color: #475569;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      text-decoration: none;
+      display: inline-block;
+      padding: 14px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+      transition: 0.3s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #f1f5f9;
+      color: #0f172a;
+      border: 1px solid #e2e8f0;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .visual {
+      background: linear-gradient(135deg, #0f172a, #1e3a8a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      position: relative;
+    }
+
+    .circle {
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #7dd3fc, #2563eb 50%, #0f172a);
+      box-shadow: 0 20px 40px rgba(37, 99, 235, 0.5);
+      position: relative;
+    }
+
+    .circle::before,
+    .circle::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.4);
+    }
+
+    .circle::before {
+      width: 280px;
+      height: 280px;
+      top: -20px;
+      left: -20px;
+    }
+
+    .circle::after {
+      width: 320px;
+      height: 320px;
+      top: -40px;
+      left: -40px;
+    }
+
+    @media (max-width: 760px) {
+      .card {
+        grid-template-columns: 1fr;
+      }
+
+      .content {
+        padding: 40px 24px;
+      }
+
+      h1 {
+        font-size: 36px;
+      }
+
+      .visual {
+        min-height: 220px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="content">
+        <div class="badge">Welcome</div>
+        <h1>Build something amazing.</h1>
+        <p>
+          This is a simple dummy welcome page with modern styling.
+          You can use it as a starting point for a project landing page,
+          admin panel, or demo website.
+        </p>
+
+        <div class="buttons">
+          <a href="#" class="btn btn-primary">Get Started</a>
+          <a href="#" class="btn btn-secondary">Learn More</a>
+        </div>
+      </div>
+
+      <div class="visual">
+        <div class="circle"></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
