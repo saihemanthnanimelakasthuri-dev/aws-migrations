@@ -38,6 +38,7 @@ def calculate(
     _: None = Depends(require_api_key),
 ) -> dict[str, float | str]:
     logger.info("Calculation requested: operation=%s", request.operation)
+    logger.info("aaded one more print")
     if request.operation == "add":
         result = request.first + request.second
     elif request.operation == "subtract":
