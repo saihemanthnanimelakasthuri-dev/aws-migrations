@@ -1,0 +1,101 @@
+name: Build and push changed tools
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "tools/**"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION || 'ap-south-1' }}
+  AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID || '687285458732' }}
+
+jobs:
+  changes:
+    name: Detect changed tools
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.tools.outputs.matrix }}
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create tool matrix
+        id: tools
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          CURRENT_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          if [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            changed_files=$(git ls-tree -r --name-only "$CURRENT_SHA")
+          else
+            changed_files=$(git diff --name-only "$BEFORE_SHA" "$CURRENT_SHA")
+          fi
+
+          tools=$(printf '%s\n' "$changed_files" \
+            | awk -F/ '$1 == "tools" && NF >= 2 { print $2 }' \
+            | sort -u \
+            | jq -R -s -c 'split("\n") | map(select(length > 0))')
+
+          echo "Changed tools: $tools"
+          echo "matrix={\"tool\":$tools}" >> "$GITHUB_OUTPUT"
+
+  build-and-push:
+    name: Build and push ${{ matrix.tool }}
+    needs: changes
+    if: ${{ fromJSON(needs.changes.outputs.matrix).tool[0] != null }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.changes.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push image
+        shell: bash
+        env:
+          TOOL_NAME: ${{ matrix.tool }}
+        run: |
+          set -euo pipefail
+          TOOL_DIR="tools/${TOOL_NAME}"
+          IMAGE_REPOSITORY="simple-web-app"
+          ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+
+          test -f "${TOOL_DIR}/requirements.txt"
+          test -f "${TOOL_DIR}/code-execution/main.py"
+
+          cat > "${TOOL_DIR}/Dockerfile.ci" <<'EOF'
+          FROM python:3.12-slim
+          WORKDIR /app
+          COPY requirements.txt .
+          RUN pip install --no-cache-dir -r requirements.txt
+          COPY code-execution/main.py .
+          CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+          EOF
+          trap 'rm -f "${TOOL_DIR}/Dockerfile.ci"' EXIT
+
+          IMAGE_URI="${ECR_REGISTRY}/${IMAGE_REPOSITORY}:${TOOL_NAME}"
+
+          docker build -f "${TOOL_DIR}/Dockerfile.ci" -t "$IMAGE_URI" "$TOOL_DIR"
+          docker push "$IMAGE_URI"
