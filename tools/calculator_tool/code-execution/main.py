@@ -1,4 +1,5 @@
 import os
+import logging
 from pathlib import Path
 from secrets import compare_digest
 
@@ -9,6 +10,7 @@ from pydantic import BaseModel, Field
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
+logger = logging.getLogger(__name__)
 app = FastAPI(title="Calculator Tool", version="1.0.0")
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
@@ -35,6 +37,7 @@ def calculate(
     request: CalculationRequest,
     _: None = Depends(require_api_key),
 ) -> dict[str, float | str]:
+    logger.info("Calculation requested: operation=%s", request.operation)
     if request.operation == "add":
         result = request.first + request.second
     elif request.operation == "subtract":
