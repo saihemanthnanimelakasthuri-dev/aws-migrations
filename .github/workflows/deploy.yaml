@@ -34,10 +34,13 @@ jobs:
         env:
           BEFORE_SHA: ${{ github.event.before }}
           CURRENT_SHA: ${{ github.sha }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           set -euo pipefail
 
-          if [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] \
+            || [ -z "$BEFORE_SHA" ] \
+            || [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
             changed_files=$(git ls-tree -r --name-only "$CURRENT_SHA")
           else
             changed_files=$(git diff --name-only "$BEFORE_SHA" "$CURRENT_SHA")
