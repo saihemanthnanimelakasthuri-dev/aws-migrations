@@ -39,6 +39,7 @@ def calculate(
 ) -> dict[str, float | str]:
     logger.info("Calculation requested: operation=%s", request.operation)
     logger.info("aaded one more print")
+    logger.info("added this line")
     if request.operation == "add":
         result = request.first + request.second
     elif request.operation == "subtract":
